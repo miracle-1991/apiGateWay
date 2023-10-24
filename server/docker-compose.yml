@@ -60,9 +60,9 @@ services:
       context: echo
     restart: always
     ports:
-      - "9082:8089/tcp"
+      - "9082:8088/tcp"
     environment:
-      - PORT=8089
+      - PORT=8088
       - VERSION=2
     networks:
       apisix:

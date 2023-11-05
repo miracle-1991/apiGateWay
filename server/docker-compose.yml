@@ -1,6 +1,18 @@
 version: "3"
 
 services:
+  consul:
+    image: hashicorp/consul:latest
+    ports:
+      - "8300:8300"
+      - "8400:8400"
+      - "8500:8500"
+    restart: always
+    volumes:
+      - consul-data:/consul/data
+    networks:
+      apisix:
+
   apisix-dashboard:
     image: apache/apisix-dashboard:3.0.1-alpine
     restart: always
@@ -18,7 +30,7 @@ services:
       - ./apisix_conf/config.yaml:/usr/local/apisix/conf/config.yaml:ro
     depends_on:
       - etcd
-    ##network_mode: host
+      - consul
     ports:
       - "9180:9180/tcp"
       - "9080:9080/tcp"
@@ -49,9 +61,14 @@ services:
     restart: always
     ports:
       - "9081:8088/tcp"
+    depends_on:
+      - consul
     environment:
       - PORT=8088
       - VERSION=1
+      - CONSUL_HTTP_ADDR=consul:8500
+      - HEALTH_CHECK_INTERVAL=1s
+      - DEREGISTER_CRITICAL_SERVICE_AFTER=10m
     networks:
       apisix:
 
@@ -61,9 +78,14 @@ services:
     restart: always
     ports:
       - "9082:8088/tcp"
+    depends_on:
+      - consul
     environment:
       - PORT=8088
       - VERSION=2
+      - CONSUL_HTTP_ADDR=consul:8500
+      - HEALTH_CHECK_INTERVAL=1s
+      - DEREGISTER_CRITICAL_SERVICE_AFTER=10m
     networks:
       apisix:
 
@@ -96,3 +118,4 @@ networks:
 volumes:
   etcd_data:
     driver: local
+  consul-data:

@@ -49,6 +49,10 @@ func echo(c *gin.Context) {
 	}
 }
 
+func health(c *gin.Context) {
+	c.JSON(config.OK, gin.H{})
+}
+
 func Init() *gin.Engine {
 	gin.SetMode(gin.DebugMode)
 	r := gin.New()
@@ -56,6 +60,7 @@ func Init() *gin.Engine {
 	r.Use(gin.Recovery())
 	r.Use(cors.Default())
 
+	r.GET("/health", health)
 	r.GET("/hello", hello)
 	r.POST("/echo", echo)
 	return r

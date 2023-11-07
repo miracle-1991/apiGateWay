@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package echo;
+option go_package="./;echo";
+
+service GeoService {
+  rpc FillGeoHash(FillGeoHashRequest) returns (FillGeoHashResponse) {}
+}
+
+message Point {
+  double lat = 1;
+  double lon = 2;
+}
+
+message Polygon {
+  repeated Point vertices = 1;
+}
+
+message MultiPolygon {
+  repeated Polygon polygons = 1;
+}
+
+message FillGeoHashRequest {
+  string boundaryName = 1;
+  uint32 precision = 2;
+  MultiPolygon boundary = 3;
+}
+
+message FillGeoHashResponse {
+  repeated string geoHash = 1;
+}

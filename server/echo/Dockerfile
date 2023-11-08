@@ -1,6 +1,6 @@
 FROM golang:1.20
 
-RUN apt-get update && apt-get -y install vim
+RUN apt-get update && apt-get -y install vim && apt-get install libgeos-dev -y
 
 
 #set workdir

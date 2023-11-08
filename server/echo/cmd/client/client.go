@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	conn, err := grpc.Dial("127.0.0.1:8089", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.Dial("127.0.0.1:9084", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		fmt.Println("gRPC dial err:", err)
 	}
@@ -17,7 +17,7 @@ func main() {
 
 	client := echo.NewGeoServiceClient(conn)
 	resp, err := client.FillGeoHash(context.Background(), &echo.FillGeoHashRequest{
-		BoundaryName: "beijing",
+		BoundaryName: "chengdu",
 		Precision:    6,
 		Boundary: &echo.MultiPolygon{
 			Polygons: []*echo.Polygon{
@@ -39,7 +39,7 @@ func main() {
 						&echo.Point{Lat: 30.67412880125752, Lon: 103.99050661667191},
 						&echo.Point{Lat: 30.701291076077624, Lon: 104.00698694578595},
 						&echo.Point{Lat: 30.70704013040491, Lon: 104.02065715840023},
-						&echo.Point{Lat: 30.725932779733828, Lon: 104.04810399201176}},
+					},
 				},
 			},
 		},
@@ -48,6 +48,10 @@ func main() {
 		fmt.Printf("fail, error:%v\n", err)
 		return
 	}
-	fmt.Printf("success: %v\n", resp)
+	fmt.Printf("get geo hash success: \n")
+	geohashs := resp.GeoHash
+	for _, hashStr := range geohashs {
+		fmt.Printf("%v\n", hashStr)
+	}
 	return
 }

@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/Willyham/hashfill"
 	echo "github.com/miracle-1991/apiGateWay/server/echo/proto"
 	geom "github.com/twpayne/go-geom"
@@ -20,11 +19,7 @@ func (g *GeosService) FillGeoHash(ctx context.Context, request *echo.FillGeoHash
 	if boundary == nil {
 		return nil, errors.New("Invalid Boundary")
 	}
-	geoFence, err := convertBoundaryToGeoFence(boundary)
-	if err != nil {
-		return nil, errors.New(fmt.Sprintf("Parse Boundary Fail: %v", err))
-	}
-
+	geoFence := convertBoundaryToGeoFence(boundary)
 	precision := request.GetPrecision()
 	filler := hashfill.NewRecursiveFiller(hashfill.WithMaxPrecision(int(precision)))
 	hashes, err := filler.Fill(geoFence, hashfill.FillIntersects)
@@ -34,19 +29,21 @@ func (g *GeosService) FillGeoHash(ctx context.Context, request *echo.FillGeoHash
 	return &echo.FillGeoHashResponse{GeoHash: hashes}, nil
 }
 
-func convertBoundaryToGeoFence(boundary *echo.MultiPolygon) (*geom.Polygon, error) {
-	geofence := &geom.Polygon{}
-	coords := [][]geom.Coord{}
-	for _, polygon := range boundary.Polygons {
+func convertBoundaryToGeoFence(boundary *echo.MultiPolygon) *geom.Polygon {
+	var outerRing []geom.Coord
+	var innerRing [][]geom.Coord
+	for i, polygon := range boundary.Polygons {
 		coord := []geom.Coord{}
 		for _, point := range polygon.Vertices {
 			coord = append(coord, geom.Coord{point.Lon, point.Lat})
 		}
-		coords = append(coords, coord)
+		coord = append(coord, coord[0])
+		if i == 0 {
+			outerRing = coord
+		} else {
+			innerRing = append(innerRing, coord)
+		}
 	}
-	p, err := geofence.SetCoords(coords)
-	if err != nil {
-		return nil, err
-	}
-	return p, nil
+	geofence := geom.NewPolygon(geom.XY).MustSetCoords(append([][]geom.Coord{outerRing}, innerRing...))
+	return geofence
 }

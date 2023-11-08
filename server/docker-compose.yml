@@ -61,10 +61,12 @@ services:
     restart: always
     ports:
       - "9081:8088/tcp"
+      - "9083:8089/tcp"
     depends_on:
       - consul
     environment:
-      - PORT=8088
+      - HTTP_PORT=8088
+      - GRPC_PORT=8089
       - VERSION=1
       - CONSUL_HTTP_ADDR=consul:8500
       - HEALTH_CHECK_INTERVAL=1s
@@ -78,10 +80,12 @@ services:
     restart: always
     ports:
       - "9082:8088/tcp"
+      - "9084:8089/tcp"
     depends_on:
       - consul
     environment:
-      - PORT=8088
+      - HTTP_PORT=8088
+      - GRPC_PORT=8089
       - VERSION=2
       - CONSUL_HTTP_ADDR=consul:8500
       - HEALTH_CHECK_INTERVAL=1s
@@ -103,7 +107,7 @@ services:
     image: grafana/grafana:7.3.7
     restart: always
     ports:
-      - "3000:3000"
+      - "3001:3000"
     volumes:
       - "./grafana_conf/provisioning:/etc/grafana/provisioning"
       - "./grafana_conf/dashboards:/var/lib/grafana/dashboards"

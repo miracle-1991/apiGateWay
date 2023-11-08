@@ -3,8 +3,10 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/Willyham/hashfill"
 	echo "github.com/miracle-1991/apiGateWay/server/echo/proto"
+	geom "github.com/twpayne/go-geom"
 )
 
 type Service interface {
@@ -20,7 +22,7 @@ func (g *GeosService) FillGeoHash(ctx context.Context, request *echo.FillGeoHash
 	}
 	geoFence, err := convertBoundaryToGeoFence(boundary)
 	if err != nil {
-		return nil, errors.New("Parse Boundary Fail")
+		return nil, errors.New(fmt.Sprintf("Parse Boundary Fail: %v", err))
 	}
 
 	precision := request.GetPrecision()
@@ -34,19 +36,17 @@ func (g *GeosService) FillGeoHash(ctx context.Context, request *echo.FillGeoHash
 
 func convertBoundaryToGeoFence(boundary *echo.MultiPolygon) (*geom.Polygon, error) {
 	geofence := &geom.Polygon{}
+	coords := [][]geom.Coord{}
 	for _, polygon := range boundary.Polygons {
-		coords := []geom.Coord{}
+		coord := []geom.Coord{}
 		for _, point := range polygon.Vertices {
-			coords = append(coords, geom.Coord{point.Lon, point.Lat})
+			coord = append(coord, geom.Coord{point.Lon, point.Lat})
 		}
-		ring, err := geom.NewLinearRing(geom.XY).SetCoords(coords)
-		if err != nil {
-			return nil, err
-		}
-		err = geofence.Push(ring)
-		if err != nil {
-			return nil, err
-		}
+		coords = append(coords, coord)
 	}
-	return geofence, nil
+	p, err := geofence.SetCoords(coords)
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
 }

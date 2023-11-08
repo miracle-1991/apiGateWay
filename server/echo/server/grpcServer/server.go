@@ -23,7 +23,7 @@ func StartGrpcServer() {
 	}
 	handler := myTransPort.NewEchoServer(endPoints)
 
-	address := fmt.Sprintf(":%d", config.PORT)
+	address := fmt.Sprintf(":%d", config.GRPC_PORT)
 	ls, _ := net.Listen("tcp", address)
 	gRPCServer := grpc.NewServer()
 	echo.RegisterGeoServiceServer(gRPCServer, handler)

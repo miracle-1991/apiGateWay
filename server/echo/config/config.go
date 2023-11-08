@@ -8,7 +8,8 @@ import (
 
 const (
 	SERVICENAME                           = "echo"
-	ENV_PORT                              = "PORT"
+	ENV_HTTP_PORT                         = "HTTP_PORT"
+	ENV_GRPC_PORT                         = "GRPC_PORT"
 	ENV_VERSION                           = "VERSION"
 	ENV_CONSUL_ADDR                       = "CONSUL_HTTP_ADDR"
 	ENV_HEALTH_CHECK_TIMEOUT              = "HEALTH_CHECK_TIMEOUT"
@@ -16,21 +17,28 @@ const (
 	ENV_DEREGISTER_CRITICAL_SERVICE_AFTER = "DEREGISTER_CRITICAL_SERVICE_AFTER"
 )
 
-var PORT, VER int
+var HTTP_PORT, GRPC_PORT, VER int
 var CONSUL_ADDR, HEALTH_CHECK_TIMEOUT, HEALTH_CHECK_INTERVAL, DEREGISTER_CRITICAL_SERVICE_AFTER string
 
 func init() {
-	port := os.Getenv(ENV_PORT)
+	httpPort := os.Getenv(ENV_HTTP_PORT)
+	grpcPort := os.Getenv(ENV_GRPC_PORT)
 	version := os.Getenv(ENV_VERSION)
-	if port == "" || version == "" {
+	if httpPort == "" || grpcPort == "" || version == "" {
 		panic("invalid port and version")
 	}
 	var err error
-	PORT, err = strconv.Atoi(port)
+	HTTP_PORT, err = strconv.Atoi(httpPort)
 	if err != nil {
-		panic(fmt.Sprintf("parse port err: %v", err))
+		panic(fmt.Sprintf("parse http port err: %v", err))
 	}
-	fmt.Printf("port: %v\n", PORT)
+	fmt.Printf("http port: %v\n", HTTP_PORT)
+
+	GRPC_PORT, err = strconv.Atoi(grpcPort)
+	if err != nil {
+		panic(fmt.Sprintf("parse grpc port err: %v", err))
+	}
+	fmt.Printf("grpc port: %v\n", HTTP_PORT)
 
 	VER, err = strconv.Atoi(version)
 	if err != nil {

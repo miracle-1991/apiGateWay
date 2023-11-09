@@ -1,15 +1,15 @@
-package router
+package transport
 
 import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/miracle-1991/apiGateWay/server/echo/config"
-	"github.com/miracle-1991/apiGateWay/server/echo/server/httpServer"
+	"github.com/miracle-1991/apiGateWay/server/echo/server/httpServer/service"
 	"io"
 )
 
 func hello(c *gin.Context) {
-	impl := &httpServer.IMPL{}
+	impl := &service.IMPL{}
 	code, resp, err := impl.Hello(c.Request.Context())
 	if err != nil {
 		c.JSON(code, gin.H{
@@ -25,7 +25,7 @@ func hello(c *gin.Context) {
 }
 
 func echo(c *gin.Context) {
-	impl := &httpServer.IMPL{}
+	impl := &service.IMPL{}
 	bodyBytes, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		c.JSON(config.InvalidInput, gin.H{

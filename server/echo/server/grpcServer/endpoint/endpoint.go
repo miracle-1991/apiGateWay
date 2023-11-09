@@ -10,8 +10,7 @@ import (
 )
 
 type EchoEndPoints struct {
-	EchoEndPoint        endpoint.Endpoint
-	HealthCheckEndPoint endpoint.Endpoint
+	EchoEndPoint endpoint.Endpoint
 }
 
 func (e EchoEndPoints) FillGeoHash(ctx context.Context, r *echo.FillGeoHashRequest) (*echo.FillGeoHashResponse, error) {
@@ -43,18 +42,5 @@ func MakeEchoEndPoint(svc service.Service) endpoint.Endpoint {
 		}
 
 		return EchoResponse{res, err}, nil
-	}
-}
-
-type HealthCheckRequst struct{}
-type HealthCheckResponse struct {
-	Status bool `json:"status"`
-}
-
-func MakeHealthCheckEndPoint(svc service.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		return HealthCheckResponse{
-			Status: true,
-		}, nil
 	}
 }

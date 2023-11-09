@@ -16,10 +16,8 @@ func StartGrpcServer() {
 	svc = &service.GeosService{}
 
 	endPoint := endpoint.MakeEchoEndPoint(svc)
-	healthCheckPoint := endpoint.MakeHealthCheckEndPoint(svc)
 	endPoints := endpoint.EchoEndPoints{
-		EchoEndPoint:        endPoint,
-		HealthCheckEndPoint: healthCheckPoint,
+		EchoEndPoint: endPoint,
 	}
 	handler := myTransPort.NewEchoServer(endPoints)
 

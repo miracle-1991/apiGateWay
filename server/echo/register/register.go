@@ -21,22 +21,49 @@ func NewConsul(addr string) (*consul, error) {
 	return &consul{c}, nil
 }
 
-func (c *consul) RegisterService(serviceName string, ip string, port int, tags []string) error {
-	//health check
-	srv := &api.AgentServiceRegistration{
-		ID:      fmt.Sprintf("%s-%s-%d", serviceName, ip, port),
-		Name:    serviceName,
+func (c *consul) RegisterService(serviceName string, ip string, httpPort, grpcPort int, tags []string) (string, string, error) {
+	// register http
+	httpServiceID := fmt.Sprintf("%s-%s-%d", serviceName, ip, httpPort)
+	httpSrv := &api.AgentServiceRegistration{
+		ID:      httpServiceID,
+		Name:    serviceName + "_http",
 		Tags:    tags,
 		Address: ip,
-		Port:    port,
+		Port:    httpPort,
 		Check: &api.AgentServiceCheck{
-			HTTP:                           fmt.Sprintf("http://%s:%d/health", ip, port),
+			HTTP:                           fmt.Sprintf("http://%s:%d/health", ip, httpPort),
 			Timeout:                        config.HEALTH_CHECK_TIMEOUT,
 			Interval:                       config.HEALTH_CHECK_INTERVAL,
 			DeregisterCriticalServiceAfter: config.DEREGISTER_CRITICAL_SERVICE_AFTER,
 		},
 	}
-	return c.client.Agent().ServiceRegister(srv)
+	err := c.client.Agent().ServiceRegister(httpSrv)
+	if err != nil {
+		fmt.Printf("failed to register http server, error: %v", err)
+		return "", "", err
+	}
+
+	// register grpc
+	grpcServiceID := fmt.Sprintf("%s-%s-%d", serviceName, ip, grpcPort)
+	grpcSrv := &api.AgentServiceRegistration{
+		ID:      grpcServiceID,
+		Name:    serviceName + "_grpc",
+		Tags:    tags,
+		Address: ip,
+		Port:    grpcPort,
+		Check: &api.AgentServiceCheck{
+			GRPC:                           fmt.Sprintf("%s:%d", ip, grpcPort),
+			Timeout:                        config.HEALTH_CHECK_TIMEOUT,
+			Interval:                       config.HEALTH_CHECK_INTERVAL,
+			DeregisterCriticalServiceAfter: config.DEREGISTER_CRITICAL_SERVICE_AFTER,
+		},
+	}
+	err = c.client.Agent().ServiceRegister(grpcSrv)
+	if err != nil {
+		fmt.Printf("failed to register grpc server, error: %v", err)
+		return "", "", err
+	}
+	return httpServiceID, grpcServiceID, nil
 }
 
 func (c *consul) Deregister(serviceID string) error {

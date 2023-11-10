@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	echo "github.com/miracle-1991/apiGateWay/server/echo/proto"
 	"google.golang.org/grpc"
@@ -16,7 +17,7 @@ func main() {
 	defer conn.Close()
 
 	client := echo.NewGeoServiceClient(conn)
-	resp, err := client.FillGeoHash(context.Background(), &echo.FillGeoHashRequest{
+	req := &echo.FillGeoHashRequest{
 		BoundaryName: "chengdu",
 		Precision:    6,
 		Boundary: &echo.MultiPolygon{
@@ -43,7 +44,10 @@ func main() {
 				},
 			},
 		},
-	})
+	}
+	data, _ := json.Marshal(req)
+	fmt.Printf("%v\n", string(data))
+	resp, err := client.FillGeoHash(context.Background(), req)
 	if err != nil {
 		fmt.Printf("fail, error:%v\n", err)
 		return

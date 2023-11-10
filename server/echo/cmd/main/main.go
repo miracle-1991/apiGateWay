@@ -26,7 +26,7 @@ func main() {
 	if err != nil {
 		panic("failed to register to consul: " + err.Error())
 	}
-	fmt.Printf("success register to consul, httpServiceID: %s, grpcServiceID\n", httpServiceID, grpcServiceID)
+	fmt.Printf("success register to consul, httpServiceID: %s, grpcServiceID: %s\n", httpServiceID, grpcServiceID)
 
 	// start http server
 	go func() {

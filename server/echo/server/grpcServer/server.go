@@ -8,6 +8,8 @@ import (
 	"github.com/miracle-1991/apiGateWay/server/echo/server/grpcServer/service"
 	myTransPort "github.com/miracle-1991/apiGateWay/server/echo/server/grpcServer/transport"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"net"
 )
 
@@ -24,7 +26,10 @@ func StartGrpcServer() {
 	address := fmt.Sprintf(":%d", config.GRPC_PORT)
 	ls, _ := net.Listen("tcp", address)
 	gRPCServer := grpc.NewServer()
-	echo.RegisterGeoServiceServer(gRPCServer, handler)
 
+	healthServer := health.NewServer()
+	healthServer.SetServingStatus("", healthpb.HealthCheckResponse_SERVING)
+	healthpb.RegisterHealthServer(gRPCServer, healthServer)
+	echo.RegisterGeoServiceServer(gRPCServer, handler)
 	gRPCServer.Serve(ls)
 }

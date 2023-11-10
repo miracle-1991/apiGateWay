@@ -5,7 +5,6 @@ import (
 	"github.com/go-kit/kit/transport/grpc"
 	echo "github.com/miracle-1991/apiGateWay/server/echo/proto"
 	"github.com/miracle-1991/apiGateWay/server/echo/server/grpcServer/endpoint"
-	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
 type grpcServer struct {
@@ -42,10 +41,4 @@ func DecodeRequest(ctx context.Context, r interface{}) (interface{}, error) {
 func EncodeResponse(ctx context.Context, r interface{}) (interface{}, error) {
 	resp := r.(endpoint.EchoResponse)
 	return resp.Result, resp.Error
-}
-
-func (s *grpcServer) Check(context.Context, *healthpb.HealthCheckRequest) (*healthpb.HealthCheckResponse, error) {
-	return &healthpb.HealthCheckResponse{
-		Status: healthpb.HealthCheckResponse_SERVING,
-	}, nil
 }

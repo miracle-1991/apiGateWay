@@ -31,12 +31,15 @@ services:
     depends_on:
       - etcd
       - consul
+      - otel-collector
     ports:
       - "9180:9180/tcp"
       - "9080:9080/tcp"
       - "9091:9091/tcp"
       - "9443:9443/tcp"
       - "9092:9092/tcp"
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
     networks:
       apisix:
 
@@ -64,6 +67,7 @@ services:
       - "9083:8089/tcp"
     depends_on:
       - consul
+      - otel-collector
     environment:
       - HTTP_PORT=8088
       - GRPC_PORT=8089
@@ -83,6 +87,7 @@ services:
       - "9084:8089/tcp"
     depends_on:
       - consul
+      - otel-collector
     environment:
       - HTTP_PORT=8088
       - GRPC_PORT=8089
@@ -93,8 +98,36 @@ services:
     networks:
       apisix:
 
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./opentelemetry_conf/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    networks:
+      - apisix
+    depends_on:
+      - jaeger
+      - prometheus
+    ports:
+      - "4317:4317"   #OTLP protocol data
+      - "55680:55680" #OTLP protocol data
+      - "55681:55681" #
+      - "8889:8889"   #prometheus metrics port
+    environment:
+      METRICS_PORT: 8889
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    restart: always
+    ports:
+      - "6831:6831/udp"
+      - "16686:16686"
+      - "14268:14268"
+    networks:
+      apisix:
+
   prometheus:
-    image: prom/prometheus:v2.25.0
+    image: prom/prometheus:latest
     restart: always
     volumes:
       - ./prometheus_conf/prometheus.yml:/etc/prometheus/prometheus.yml

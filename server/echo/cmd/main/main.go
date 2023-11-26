@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/miracle-1991/apiGateWay/server/echo/config"
+	"github.com/miracle-1991/apiGateWay/server/echo/observable/trace"
 	"github.com/miracle-1991/apiGateWay/server/echo/register"
 	"github.com/miracle-1991/apiGateWay/server/echo/server/grpcServer"
 	"github.com/miracle-1991/apiGateWay/server/echo/server/httpServer"
@@ -13,7 +14,7 @@ import (
 )
 
 func main() {
-	//register
+	//register consul
 	c, err := register.NewConsul(config.CONSUL_ADDR)
 	if err != nil {
 		panic("failed to create consul client: " + err.Error())
@@ -27,6 +28,12 @@ func main() {
 		panic("failed to register to consul: " + err.Error())
 	}
 	fmt.Printf("success register to consul, httpServiceID: %s, grpcServiceID: %s\n", httpServiceID, grpcServiceID)
+
+	// register tracer
+	err = trace.Register()
+	if err != nil {
+		fmt.Printf("failed to register trace, err:%v\n", err)
+	}
 
 	// start http server
 	go func() {
@@ -43,4 +50,5 @@ func main() {
 	<-quit
 	_ = c.Deregister(httpServiceID)
 	_ = c.Deregister(grpcServiceID)
+	_ = trace.UnRegister()
 }

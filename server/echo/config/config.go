@@ -12,13 +12,14 @@ const (
 	ENV_GRPC_PORT                         = "GRPC_PORT"
 	ENV_VERSION                           = "VERSION"
 	ENV_CONSUL_ADDR                       = "CONSUL_HTTP_ADDR"
+	ENV_OTEL_ADDR                         = "OTEL_ADDR"
 	ENV_HEALTH_CHECK_TIMEOUT              = "HEALTH_CHECK_TIMEOUT"
 	ENV_HEALTH_CHECK_INTERVAL             = "HEALTH_CHECK_INTERVAL"
 	ENV_DEREGISTER_CRITICAL_SERVICE_AFTER = "DEREGISTER_CRITICAL_SERVICE_AFTER"
 )
 
 var HTTP_PORT, GRPC_PORT, VER int
-var CONSUL_ADDR, HEALTH_CHECK_TIMEOUT, HEALTH_CHECK_INTERVAL, DEREGISTER_CRITICAL_SERVICE_AFTER string
+var CONSUL_ADDR, HEALTH_CHECK_TIMEOUT, HEALTH_CHECK_INTERVAL, DEREGISTER_CRITICAL_SERVICE_AFTER, OTEL_ADDR string
 
 func init() {
 	httpPort := os.Getenv(ENV_HTTP_PORT)
@@ -51,6 +52,12 @@ func init() {
 		panic("invalid consul addr")
 	}
 	fmt.Printf("consul addr: %v\n", CONSUL_ADDR)
+
+	OTEL_ADDR = os.Getenv(ENV_OTEL_ADDR)
+	if OTEL_ADDR == "" {
+		panic("invalid otel addr")
+	}
+	fmt.Printf("otel addr %v\n", OTEL_ADDR)
 
 	// 超过10秒不返回认为不健康
 	HEALTH_CHECK_TIMEOUT = os.Getenv(ENV_HEALTH_CHECK_TIMEOUT)

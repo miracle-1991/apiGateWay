@@ -71,6 +71,7 @@ services:
       - GRPC_PORT=8089
       - VERSION=1
       - CONSUL_HTTP_ADDR=consul:8500
+      - OTEL_ADDR=otel-collector:4317
       - HEALTH_CHECK_INTERVAL=1s
       - DEREGISTER_CRITICAL_SERVICE_AFTER=10m
     networks:
@@ -91,6 +92,7 @@ services:
       - GRPC_PORT=8089
       - VERSION=2
       - CONSUL_HTTP_ADDR=consul:8500
+      - OTEL_ADDR=otel-collector:4317
       - HEALTH_CHECK_INTERVAL=1s
       - DEREGISTER_CRITICAL_SERVICE_AFTER=10m
     networks:

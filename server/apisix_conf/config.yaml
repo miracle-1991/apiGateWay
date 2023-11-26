@@ -52,6 +52,13 @@ plugin_attr:
     export_addr:
       ip: "0.0.0.0"
       port: 9091
+  opentelemetry:
+    trace_id_source: x-request-id
+    resource:
+      service.name: APISIX
+    collector:
+      address: otel-collector:4318  # OTLP HTTP Receiver address
+      request_timeout: 3
 
 discovery:
   consul:

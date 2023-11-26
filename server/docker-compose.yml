@@ -38,8 +38,6 @@ services:
       - "9091:9091/tcp"
       - "9443:9443/tcp"
       - "9092:9092/tcp"
-    environment:
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
     networks:
       apisix:
 
@@ -109,20 +107,22 @@ services:
       - jaeger
       - prometheus
     ports:
-      - "4317:4317"   #OTLP protocol data
+      - "1888:1888"   #pprof expand
+      - "8888:8888"   #receive prometheus data
+      - "8889:8889"   #output prometheus data
+      - "13133:13133" #health check expand
+      - "4317:4317"   #OTLP grpc receiver
+      - "4318:4318"   #OTLP http receiver
+      - "55679:55679" #zpages extension
       - "55680:55680" #OTLP protocol data
-      - "55681:55681" #
-      - "8889:8889"   #prometheus metrics port
-    environment:
-      METRICS_PORT: 8889
 
   jaeger:
     image: jaegertracing/all-in-one:latest
     restart: always
     ports:
-      - "6831:6831/udp"
-      - "16686:16686"
-      - "14268:14268"
+      - "16686:16686" # jaeger UI port
+      - "14268:14268" # receive data from OTEL Collector
+      - "14250:14250" # receive data from OTEL Collector
     networks:
       apisix:
 

@@ -2,27 +2,40 @@ receivers:
   otlp:
     protocols:
       grpc:
-      http:
+      http:  #receive data from apisix or server, default port 4318
 
 processors:
   batch:
 
 exporters:
   otlp:
-    endpoint: jaeger:4317
+    endpoint: jaeger:4317 # send data to jaeger or zipkin
     tls:
       insecure: true
+
+  debug:
+
   prometheus:
-    endpoint: "0.0.0.0:${METRICS_PORT}"
+    endpoint: "0.0.0.0:8889"
+
   logging:
     loglevel: debug
 
+extensions:
+  health_check:
+  pprof:
+    endpoint: :1888
+  zpages:
+    endpoint: :55679
+
 service:
+  extensions: [pprof, zpages, health_check]
   pipelines:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlp, logging]
+      exporters: [debug,otlp]
     metrics:
       receivers: [otlp]
-      exporters: [prometheus,logging]
+      processors: [batch]
+      exporters: [debug,prometheus]

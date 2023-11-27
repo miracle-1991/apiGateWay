@@ -1,16 +1,23 @@
 package transport
 
 import (
+	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/miracle-1991/apiGateWay/server/echo/config"
+	"github.com/miracle-1991/apiGateWay/server/echo/observable/trace"
+	echo "github.com/miracle-1991/apiGateWay/server/echo/proto"
 	"github.com/miracle-1991/apiGateWay/server/echo/server/httpServer/service"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 	"io"
 )
 
-func hello(c *gin.Context) {
+func helloHandler(c *gin.Context) {
+	ctx, span := trace.Tracer.Start(c.Request.Context(), "transport-hello")
+	defer span.End()
+
 	impl := &service.IMPL{}
-	code, resp, err := impl.Hello(c.Request.Context())
+	code, resp, err := impl.Hello(ctx)
 	if err != nil {
 		c.JSON(code, gin.H{
 			"version": config.VER,
@@ -24,7 +31,10 @@ func hello(c *gin.Context) {
 	}
 }
 
-func echo(c *gin.Context) {
+func echoHandler(c *gin.Context) {
+	ctx, span := trace.Tracer.Start(c.Request.Context(), "transport-echo")
+	defer span.End()
+
 	impl := &service.IMPL{}
 	bodyBytes, err := io.ReadAll(c.Request.Body)
 	if err != nil {
@@ -35,7 +45,7 @@ func echo(c *gin.Context) {
 		return
 	}
 
-	code, resp, err := impl.Echo(c.Request.Context(), string(bodyBytes))
+	code, resp, err := impl.Echo(ctx, string(bodyBytes))
 	if err != nil {
 		c.JSON(code, gin.H{
 			"version": config.VER,
@@ -49,19 +59,45 @@ func echo(c *gin.Context) {
 	}
 }
 
-func health(c *gin.Context) {
+func healthHandler(c *gin.Context) {
 	c.JSON(config.OK, gin.H{})
+}
+
+func hashFillHandler(c *gin.Context) {
+	ctx, span := trace.Tracer.Start(c.Request.Context(), "transport-hashfill")
+	defer span.End()
+
+	request := &echo.FillGeoHashRequest{}
+	err := c.BindJSON(request)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"message": "Data format is not valid",
+		})
+		return
+	}
+
+	impl := &service.IMPL{}
+	hashes, err := impl.FillGeoHash(ctx, request)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"message": fmt.Sprintf("failed, error: %v", err),
+		})
+		return
+	}
+	c.JSON(200, hashes)
 }
 
 func Init() *gin.Engine {
 	gin.SetMode(gin.DebugMode)
 	r := gin.New()
+	r.Use(otelgin.Middleware(config.SERVICENAME))
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
 	r.Use(cors.Default())
 
-	r.GET("/health", health)
-	r.GET("/hello", hello)
-	r.POST("/echo", echo)
+	r.GET("/health", healthHandler)
+	r.GET("/hello", helloHandler)
+	r.POST("/echo", echoHandler)
+	r.POST("/hashfill", hashFillHandler)
 	return r
 }

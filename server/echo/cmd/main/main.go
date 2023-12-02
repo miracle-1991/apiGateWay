@@ -35,7 +35,7 @@ func main() {
 		fmt.Printf("failed to register trace, err:%v\n", err)
 		panic(err)
 	} else {
-		fmt.Printf("register trace success")
+		fmt.Printf("register trace success\n")
 	}
 
 	// start http server

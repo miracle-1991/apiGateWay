@@ -33,6 +33,9 @@ func main() {
 	err = trace.Register()
 	if err != nil {
 		fmt.Printf("failed to register trace, err:%v\n", err)
+		panic(err)
+	} else {
+		fmt.Printf("register trace success")
 	}
 
 	// start http server

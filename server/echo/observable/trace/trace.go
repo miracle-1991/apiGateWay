@@ -2,6 +2,7 @@ package trace
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/miracle-1991/apiGateWay/server/echo/config"
 	"go.opentelemetry.io/otel/trace"
@@ -66,6 +67,9 @@ func Register() error {
 	shutdown = tracerProvider.Shutdown
 
 	Tracer = otel.Tracer("otel")
+	if Tracer == nil {
+		return errors.New("register otel failed")
+	}
 	return nil
 }
 

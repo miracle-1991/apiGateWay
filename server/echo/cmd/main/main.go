@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/miracle-1991/apiGateWay/server/echo/config"
+	"github.com/miracle-1991/apiGateWay/server/echo/observable/metric"
 	"github.com/miracle-1991/apiGateWay/server/echo/observable/trace"
 	"github.com/miracle-1991/apiGateWay/server/echo/register"
 	"github.com/miracle-1991/apiGateWay/server/echo/server/grpcServer"
@@ -36,6 +37,13 @@ func main() {
 		panic(err)
 	} else {
 		fmt.Printf("register trace success\n")
+	}
+
+	// start metric
+	err = metric.Init()
+	if err != nil {
+		fmt.Printf("failed to metric, error:%v\n", err)
+		panic(err)
 	}
 
 	// start http server

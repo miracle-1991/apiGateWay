@@ -8,6 +8,7 @@ import (
 	"github.com/miracle-1991/apiGateWay/server/echo/observable/trace"
 	echo "github.com/miracle-1991/apiGateWay/server/echo/proto"
 	"github.com/miracle-1991/apiGateWay/server/echo/server/httpServer/service"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 	"io"
 )
@@ -96,6 +97,7 @@ func Init() *gin.Engine {
 	r.Use(cors.Default())
 
 	r.GET("/health", healthHandler)
+	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	r.GET("/hello", helloHandler)
 	r.POST("/echo", echoHandler)
 	r.POST("/hashfill", hashFillHandler)

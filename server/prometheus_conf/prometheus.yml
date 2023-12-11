@@ -27,6 +27,13 @@ global:
 # A scrape configuration containing exactly one endpoint to scrape:
 # Here it's Prometheus itself.
 scrape_configs:
+  - job_name: echo-exporter
+    metrics_path: /metrics
+    scheme: http
+    consul_sd_configs:
+      - server: consul:8500
+        services:
+          - echo_http
   # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
   - job_name: "prometheus"
     # Override the global default and scrape targets from this job every 5 seconds.

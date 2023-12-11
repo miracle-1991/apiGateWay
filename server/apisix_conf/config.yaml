@@ -46,6 +46,7 @@ deployment:
 
 plugins:
   - opentelemetry
+  - prometheus
 
 plugin_attr:
   prometheus:
